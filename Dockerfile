@@ -37,11 +37,11 @@ RUN sfdx --version && sf --version
 # Create a new user with a home directory and default shell as bash
 RUN useradd -m -s /bin/bash sfautomation
 
+# Ensure the user has the correct permissions
+RUN chown -R sfautomation:sfautomation /home/sfautomation
+
 # Switch to the new user
 USER sfautomation
 
 # Set the working directory
 WORKDIR /home/sfautomation
-
-# Set the default command to bash
-ENTRYPOINT ["/bin/bash"]
