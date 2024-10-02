@@ -45,5 +45,5 @@ jobs:
     - name: Push the Docker image to DockerHub
       run: |
         TAG_NAME=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
-        docker tag my-image-name:${TAG_NAME} ${{ secrets.DOCKERHUB_USERNAME }}/sf_automation${TAG_NAME}
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-image-name:${TAG_NAME}
+        docker tag sf_automation:${TAG_NAME} ${{ secrets.DOCKERHUB_USERNAME }}/sf_automation${TAG_NAME}
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/sf_automation:${TAG_NAME}
