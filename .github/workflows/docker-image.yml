@@ -52,14 +52,16 @@ jobs:
           name: test-results
           path: reports/test-results.xml
 
-      # Visualize the JUnit test results (nice report)
-      - name: Publish JUnit Test Report
-        uses: dorny/test-reporter@v1
-        if: always()
+        # Publish the JUnit Test Report (with annotations)
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure()  # Always run, even if the previous step fails
         with:
-          name: JUnit Tests
-          path: reports/test-results.xml
-          reporter: junit
+          report_paths: 'reports/test-results.xml'  # Path to your JUnit XML report
+          check_name: 'Docker Pytest'  # Name of the check
+          require_tests: true   # Fail the build if no tests are found
+          job_summary: true     # Include the test summary in the job summary
+          detailed_summary: true  # Provide a detailed summary of all tests
 
   push:
     # This job runs only when a new tag is created
