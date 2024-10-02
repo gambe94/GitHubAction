@@ -10,7 +10,7 @@ on:
     paths:
       - 'Dockerfile'  # Only run if Dockerfile changes
   create:
-    tags:           # Only run when a new tag is created
+    tags:  # Only run when a new tag is created
 
 jobs:
   build:
@@ -18,11 +18,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # Build the Docker image
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag sf_automation:latest
+      # Build the Docker image
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag sf_automation:latest
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set up Python environment and run tests
+      - name: Set up and run tests
+        run: |
+          # Create a Python virtual environment and activate it
+          python3 -m venv venv
+          source venv/bin/activate
+          
+          # Install pytest, testinfra, and any other requirements
+          pip install pytest testinfra
+
+          # Run the pytest command to generate JUnit test result file
+          mkdir -p reports
+          pytest tests/docker/test_sf_automation.py --junitxml=reports/test-results.xml
+
+      # Upload test results for GitHub Actions
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: reports/test-results.xml
+
+      # Publish test results in the Actions UI (if supported by your CI provider)
+      - name: Publish test results
+        if: always() # Ensure this runs even if the test fails
+        uses: actions/upload-test-report@v2
+        with:
+          path: reports/test-results.xml
 
   push:
     # This job runs only when a new tag is created
@@ -30,20 +65,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # Log in to DockerHub
-    - name: Log in to DockerHub
-      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      # Log in to DockerHub
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-    # Build the Docker image with the tag
-    - name: Build the Docker image with Tag
-      run: |
-        TAG_NAME=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
-        docker build . --file Dockerfile --tag sf_automation:${TAG_NAME}
+      # Build the Docker image with the tag
+      - name: Build the Docker image with Tag
+        run: |
+          TAG_NAME=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
+          docker build . --file Dockerfile --tag sf_automation:${TAG_NAME}
 
-    # Push the Docker image to DockerHub
-    -   name: Push the Docker image to DockerHub
+      # Push the Docker image to DockerHub
+      - name: Push the Docker image to DockerHub
         run: |
           TAG_NAME=$(echo "${GITHUB_REF}" | sed 's/refs\/tags\///')
           docker tag sf_automation:${TAG_NAME} ${{ secrets.DOCKERHUB_USERNAME }}/sf_automation:${TAG_NAME}
