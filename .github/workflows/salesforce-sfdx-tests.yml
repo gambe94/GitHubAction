@@ -25,7 +25,7 @@ jobs:
 
     # Pull the Docker image for Salesforce CLI
     - name: Pull Salesforce SFDX Docker Image
-      run: docker pull salesforce/salesforcedx:latest
+      run: docker pull salesforce/salesforcedx:latest-full
 
     # Run tests inside the container
     - name: Run Salesforce CLI commands inside Docker
