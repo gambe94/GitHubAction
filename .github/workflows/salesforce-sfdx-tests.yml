@@ -1,0 +1,45 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Salesforce SFDX Test
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  sfdx-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Pull the Docker image for Salesforce CLI
+    - name: Pull Salesforce SFDX Docker Image
+      run: docker pull gambe94/sf_automation:1.0.2
+
+      # Run tests inside the container
+    - name: Run Salesforce CLI commands inside Docker
+      run: |
+        # Start the container and run a command inside it
+        docker run --rm -v ${PWD}:/workspace -w /workspace gambe94/sf_automation:1.0.2 /usr/bin/bash -c "
+          echo 'Running Salesforce CLI Tests...'
+          # Salesforce CLI login (example, modify with actual auth method)
+          # Replace with your command to authenticate or use test org credentials
+          sf --version
+          echo 'Salesforce CLI is successfully running!'
+          # Replace with actual test or deployment commands below
+          echo 'Running your tests...'
+          # Example test commands
+          sf org list
+          ls -la
+        "
