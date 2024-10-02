@@ -1,0 +1,49 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'Dockerfile'  # Only run if Dockerfile changes
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'Dockerfile'  # Only run if Dockerfile changes
+  create:
+    tags:           # Only run when a new tag is created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Build the Docker image
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag sf_automation:latest
+
+  push:
+    # This job runs only when a new tag is created
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Log in to DockerHub
+    - name: Log in to DockerHub
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    # Build the Docker image with the tag
+    - name: Build the Docker image with Tag
+      run: |
+        TAG_NAME=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
+        docker build . --file Dockerfile --tag sf_automation:${TAG_NAME}
+
+    # Push the Docker image to DockerHub
+    - name: Push the Docker image to DockerHub
+      run: |
+        TAG_NAME=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
+        docker tag my-image-name:${TAG_NAME} ${{ secrets.DOCKERHUB_USERNAME }}/sf_automation${TAG_NAME}
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-image-name:${TAG_NAME}
