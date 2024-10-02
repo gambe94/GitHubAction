@@ -47,10 +47,19 @@ jobs:
 
       # Upload test results for GitHub Actions
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: reports/test-results.xml
+
+      # Visualize the JUnit test results (nice report)
+      - name: Publish JUnit Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: JUnit Tests
+          path: reports/test-results.xml
+          reporter: junit
 
   push:
     # This job runs only when a new tag is created
