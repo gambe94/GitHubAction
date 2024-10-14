@@ -1,0 +1,66 @@
+name: Validate and Deploy Feature Branches
+
+on:
+    pull_request:
+        branches:
+            - release/*
+
+    push:
+        branches:
+            - release/*
+
+jobs:
+    # Step 1: Create Scratch Org
+    create-scratch-org:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Create Scratch Org
+              run: |
+                  echo "Creating scratch org..."
+                  # Add your commands to create a scratch org here
+
+    # Step 2: Run Salesforce Code Scanner (Static Analysis)
+    run-code-scanner:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Run Salesforce Code Scanner
+              run: |
+                  echo "Running Salesforce code scanner..."
+                  # Add your commands to run the Salesforce code scanner here
+
+    # Step 3: Validate Against INT (Store Deployment ID)
+    validate-against-int:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Validate Against INT and Store Deployment ID
+              run: |
+                  echo "Validating against INT..."
+                  # Command to validate the deployment to INT and store deployment ID
+                  DEPLOYMENT_ID=$(echo "mock-deployment-id")  # Replace with actual command
+                  echo "Deployment ID: $DEPLOYMENT_ID"
+                  echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV  # Store deployment ID as environment variable
+
+    # Step 4: Deploy to INT (on Merge)
+    deploy-to-int:
+        runs-on: ubuntu-latest
+        needs: validate-against-int
+        if: github.event_name == 'push' && github.event.pull_request.merged == true
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Deploy to INT
+              run: |
+                  echo "Deploying to INT..."
+                  DEPLOYMENT_ID=${{ env.DEPLOYMENT_ID }}
+                  echo "Using Deployment ID: $DEPLOYMENT_ID"
+                  # Command to deploy to INT using the stored deployment ID
