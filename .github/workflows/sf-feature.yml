@@ -20,8 +20,8 @@ jobs:
 
     # Step 2: Run Salesforce Code Scanner (Static Analysis)
     run-code-scanner:
-        runs-on: ubuntu-latest
-        needs: create-scratch-org  # Depends on scratch org creation
+        runs-on: ubuntu-latest  
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -50,8 +50,7 @@ jobs:
     # Step 4: Deploy to INT (on Merge)
     deploy-to-int:
         runs-on: ubuntu-latest
-        needs: validate-against-int  # Depends on validation success
-        if: github.event.pull_request.merged == true  # Run only if PR is merged
+        needs: validate-against-int
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
