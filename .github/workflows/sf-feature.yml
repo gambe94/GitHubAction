@@ -52,7 +52,6 @@ jobs:
     # Step 4: Deploy to INT (on Merge)
     deploy-to-int:
         runs-on: ubuntu-latest
-        needs: validate-against-int
         if: github.event_name == 'push' && github.event.pull_request.merged == true
         steps:
             - name: Checkout repository
@@ -61,6 +60,4 @@ jobs:
             - name: Deploy to INT
               run: |
                   echo "Deploying to INT..."
-                  DEPLOYMENT_ID=${{ env.DEPLOYMENT_ID }}
-                  echo "Using Deployment ID: $DEPLOYMENT_ID"
-                  # Command to deploy to INT using the stored deployment ID
+               
