@@ -1,0 +1,34 @@
+name: Create Release Branches
+on:
+    workflow_dispatch:
+        inputs:
+            date1:
+                description: 'First date'
+                required: true
+                default: $(date +'%Y-%m-%d')
+            date2:
+                description: 'Second date'
+                required: true
+                default: $(date +'%Y-%m-%d')
+
+jobs:
+    create-release-branches:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Create release branches
+              run: |
+                  DATE1=${{ github.event.inputs.date1 }}
+                  DATE2=${{ github.event.inputs.date2 }}
+                  BRANCH_NAME1="release/${DATE1}"
+                  BRANCH_NAME2="release/${DATE2}"
+                  git checkout main
+                  git pull origin main
+                  git checkout -b $BRANCH_NAME1
+                  git push origin $BRANCH_NAME1
+                  git checkout main
+                  git checkout -b $BRANCH_NAME2
+                  git push origin $BRANCH_NAME2
