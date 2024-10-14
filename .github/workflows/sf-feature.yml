@@ -20,7 +20,8 @@ jobs:
 
     # Step 2: Run Salesforce Code Scanner (Static Analysis)
     run-code-scanner:
-        runs-on: ubuntu-latest      n
+        runs-on: ubuntu-latest  
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -33,6 +34,7 @@ jobs:
     # Step 3: Validate Against INT (Store Deployment ID)
     validate-against-int:
         runs-on: ubuntu-latest
+        needs: run-code-scanner  # Depends on code scanner completion
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
