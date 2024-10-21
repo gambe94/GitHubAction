@@ -1,1 +1,1 @@
-print("Feature 1 is running2")
+print("Feature test")
