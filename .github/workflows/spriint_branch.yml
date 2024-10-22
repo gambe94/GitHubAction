@@ -37,9 +37,8 @@ jobs:
                   # Extract the branch name from the input parameter
                   BRANCH_NAME="sprint/${{ github.event.inputs.branch_name }}"
 
-                  # Create the new branch from the current default branch
-                  git fetch origin "$DEFAULT_BRANCH"
-                  git checkout -b "$BRANCH_NAME" origin/"$DEFAULT_BRANCH"
+                  git fetch origin
+                  git checkout -b "$BRANCH_NAME" origin/main      
 
                   # Push the newly created branch to the repository
                   git push origin "$BRANCH_NAME"
