@@ -20,7 +20,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                  token: ${{ secrets.GITHUB_TOKEN }}  # Uses the GitHub Token for pushing changes
+                  token: ${{ secrets.GITHUB_TOKEN }}  # Use default GitHub token for checking out the repo
 
             # Step 2: Set up Git for branch creation
             - name: Set up Git
@@ -28,22 +28,29 @@ jobs:
                   git config --global user.email "github-actions[bot]@users.noreply.github.com"
                   git config --global user.name "GitHub Actions Bot"
 
-            # Step 3: Create a new branch based on main
-            - name: Create new branch
+            # Step 3: Fetch and create a new branch based on the default branch
+            - name: Fetch and create a new branch
               run: |
+                  # Fetch the default branch name
+                  DEFAULT_BRANCH=$(gh api "/repos/${{ github.repository }}" --jq '.default_branch')
+
                   # Extract the branch name from the input parameter
                   BRANCH_NAME="sprint/${{ github.event.inputs.branch_name }}"
 
-                  # Create the new branch from the current main branch
-                  git fetch origin
-                  git checkout -b "$BRANCH_NAME" origin/main
+                  # Create the new branch from the current default branch
+                  git fetch origin "$DEFAULT_BRANCH"
+                  git checkout -b "$BRANCH_NAME" origin/"$DEFAULT_BRANCH"
 
                   # Push the newly created branch to the repository
                   git push origin "$BRANCH_NAME"
+                  
+                  # Set the default branch as an environment variable for later steps
+                  echo "DEFAULT_BRANCH=$DEFAULT_BRANCH" >> $GITHUB_ENV
 
-            # Step 4: Set new branch as default using Personal Access Token (PAT)
+            # Step 4: Set the new branch as the default
             - name: Set new branch as default
               run: |
+                  # Set the new branch as the default branch
                   gh api -X PATCH \
                     -H "Accept: application/vnd.github.v3+json" \
                     "/repos/${{ github.repository }}" \
@@ -51,15 +58,15 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}  # Use PAT instead of the default GitHub token
 
-            # Step 5: Update base branch of all open PRs
+            # Step 5: Update base branch of PRs
             - name: Update base branch of PRs
               run: |
                   repo="${{ github.repository }}"
                   newbranch="sprint/${{ github.event.inputs.branch_name }}"
 
-                  # Get list of open PRs and update base branch
-                  for num in $(gh pr list -B main --json number -q '.[].number'); do
-                    gh api -X PATCH "repos/${repo}/pulls/${num}" -f base="$newbranch"
+                  # Update all PRs with the previous default branch as their base
+                  for num in $(gh pr list -B "${{ env.DEFAULT_BRANCH }}" --json number -q '.[].number'); do
+                      gh api -X PATCH "repos/${repo}/pulls/${num}" -f base="$newbranch"
                   done
               env:
-                  GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}  # Use PAT here as well
+                  GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}  # Use PAT to authenticate GitHub API
