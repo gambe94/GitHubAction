@@ -9,14 +9,19 @@ on:
                 required: true
                 default: "A_A"
 
+permissions:
+    contents: write   # Grant write permissions for content (required for pushing new branches)
+
 jobs:
     create_branch:
         runs-on: ubuntu-latest
 
         steps:
-            # Step 1: Checkout the repository
+            # Step 1: Checkout the repository using the GITHUB_TOKEN with write permission
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}  # Ensures the token is used to authenticate
 
             # Step 2: Set up Git for branch creation
             - name: Set up Git
@@ -32,9 +37,9 @@ jobs:
 
                   # Create the new branch from the current main branch
                   git fetch origin
-                  git checkout -b "$BRANCH_NAME" origin/main      
+                  git checkout -b "$BRANCH_NAME" origin/main
 
-                  # Push the newly created branch to the repository
+                  # Push the newly created branch to the repository using the token for authentication
                   git push origin "$BRANCH_NAME"
 
             # Step 4: Set new branch as default
