@@ -1,6 +1,5 @@
 name: Create New Sprint Branch
 
-# Allows manual triggering from GitHub UI
 on:
     workflow_dispatch:
         inputs:
@@ -8,6 +7,9 @@ on:
                 description: "The branch name to create (e.g., sprint/feature-x)"
                 required: true
                 default: "A_A"
+
+permissions:
+    contents: write   # Grant write permissions for content (required for pushing new branches)
 
 jobs:
     create_branch:
@@ -17,6 +19,8 @@ jobs:
             # Step 1: Checkout the repository
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}  # Uses the GitHub Token for pushing changes
 
             # Step 2: Set up Git for branch creation
             - name: Set up Git
@@ -32,12 +36,12 @@ jobs:
 
                   # Create the new branch from the current main branch
                   git fetch origin
-                  git checkout -b "$BRANCH_NAME" origin/main      
+                  git checkout -b "$BRANCH_NAME" origin/main
 
                   # Push the newly created branch to the repository
                   git push origin "$BRANCH_NAME"
 
-            # Step 4: Set new branch as default
+            # Step 4: Set new branch as default using Personal Access Token (PAT)
             - name: Set new branch as default
               run: |
                   gh api -X PATCH \
@@ -45,4 +49,17 @@ jobs:
                     "/repos/${{ github.repository }}" \
                     -f default_branch=sprint/${{ github.event.inputs.branch_name }}
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}  # Use PAT instead of the default GitHub token
+
+            # Step 5: Update base branch of all open PRs
+            - name: Update base branch of PRs
+              run: |
+                  repo="${{ github.repository }}"
+                  newbranch="sprint/${{ github.event.inputs.branch_name }}"
+
+                  # Get list of open PRs and update base branch
+                  for num in $(gh pr list -B main --json number -q '.[].number'); do
+                    gh api -X PATCH "repos/${repo}/pulls/${num}" -f base="$newbranch"
+                  done
+              env:
+                  GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}  # Use PAT here as well
