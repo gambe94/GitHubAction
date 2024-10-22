@@ -1,0 +1,53 @@
+name: Create New Sprint Branch
+
+# Allows manual triggering from GitHub UI
+on:
+    workflow_dispatch:
+        inputs:
+            branch_name:
+                description: "The branch name to create (e.g., sprint/feature-x)"
+                required: true
+                default: "A_A"
+
+permissions:
+    contents: write   # Grant write permissions for content (required for pushing new branches)
+
+jobs:
+    create_branch:
+        runs-on: ubuntu-latest
+
+        steps:
+            # Step 1: Checkout the repository using the GITHUB_TOKEN with write permission
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}  # Ensures the token is used to authenticate
+
+            # Step 2: Set up Git for branch creation
+            - name: Set up Git
+              run: |
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                  git config --global user.name "GitHub Actions Bot"
+
+            # Step 3: Create a new branch based on main
+            - name: Create new branch
+              run: |
+                  # Extract the branch name from the input parameter
+                  BRANCH_NAME="sprint/${{ github.event.inputs.branch_name }}"
+
+                  # Create the new branch from the current main branch
+                  git fetch origin
+                  git checkout -b "$BRANCH_NAME" origin/main
+
+                  # Push the newly created branch to the repository using the token for authentication
+                  git push origin "$BRANCH_NAME"
+
+            # Step 4: Set new branch as default
+            - name: Set new branch as default
+              run: |
+                  gh api -X PATCH \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    "/repos/${{ github.repository }}" \
+                    -f default_branch=sprint/${{ github.event.inputs.branch_name }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
