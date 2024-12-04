@@ -20,16 +20,14 @@ jobs:
                 SF_TARGET_CLIENT_ID: ${{ secrets.SF_TARGET_CLIENT_ID }}
                 SF_TARGET_INSTANCE_URL: ${{ vars.SF_TARGET_INSTANCE_URL }}
                 SF_TARGET_JWT_KEY: ${{ secrets.SF_TARGET_JWT_KEY }}
-                GITHUB_HOME: /home/sfautomation
-
             ports:
                 - 80
 
-            options:
-
-                --workdir /home/sfautomation
 
         steps:
+            -   shell: bash
+                run: 'echo HOME=/home/sfautomation | sudo tee -a $GITHUB_ENV'
+
             -   name: Check for dockerenv file
                 run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
 
