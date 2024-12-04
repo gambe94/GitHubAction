@@ -16,9 +16,9 @@ jobs:
                 username: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
             env:
-                SF_TARGET_USERNAME: ${{ env.SF_TARGET_USERNAME }}
+                SF_TARGET_USERNAME: ${{ vars.SF_TARGET_USERNAME }}
                 SF_TARGET_CLIENT_ID: ${{ secrets.SF_TARGET_CLIENT_ID }}
-                SF_TARGET_INSTANCE_URL: ${{ env.SF_TARGET_INSTANCE_URL }}
+                SF_TARGET_INSTANCE_URL: ${{ vars.SF_TARGET_INSTANCE_URL }}
                 SF_TARGET_JWT_KEY: ${{ secrets.SF_TARGET_JWT_KEY }}
             ports:
                 - 80
