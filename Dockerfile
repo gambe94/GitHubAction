@@ -40,11 +40,11 @@ RUN useradd -m -s /bin/bash sfautomation && \
     mkdir -p /home/sfautomation/.npm && \
     chown -R sfautomation:sfautomation /home/sfautomation
 
-# Set HOME environment variable
-ENV HOME=/home/sfautomation
+RUN echo "sfautomation ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Set working directory
 WORKDIR /home/sfautomation
 
 # Set default user
 USER sfautomation
+
