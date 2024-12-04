@@ -1,45 +1,61 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Salesforce SFDX Test
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    push:
+        branches: [ "main" ]
+    pull_request:
+        branches: [ "main" ]
+    workflow_dispatch:
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  sfdx-tests:
-    runs-on: ubuntu-latest
+    sfdx-tests:
+        runs-on: ubuntu-latest
+        container:
+            image: gambe94/sf_automation:1.0.4
+            credentials:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+            env:
+                SF_TARGET_USERNAME: ${{ vars.SF_TARGET_USERNAME }}
+                SF_TARGET_CLIENT_ID: ${{ secrets.SF_TARGET_CLIENT_ID }}
+                SF_TARGET_INSTANCE_URL: ${{ vars.SF_TARGET_INSTANCE_URL }}
+                SF_TARGET_JWT_KEY: ${{ secrets.SF_TARGET_JWT_KEY }}
+            ports:
+                - 80
 
-    steps:
-    # Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
 
-    # Pull the Docker image for Salesforce CLI
-    - name: Pull Salesforce SFDX Docker Image
-      run: docker pull gambe94/sf_automation:1.0.2
+        steps:
+            -   shell: bash
+                run: 'echo HOME=/home/sfautomation | sudo tee -a $GITHUB_ENV'
 
-      # Run tests inside the container
-    - name: Run Salesforce CLI commands inside Docker
-      run: |
-        # Start the container and run a command inside it
-        docker run --rm -v ${PWD}:/workspace -w /workspace gambe94/sf_automation:1.0.2 /usr/bin/bash -c "
-          echo 'Running Salesforce CLI Tests...'
-          # Salesforce CLI login (example, modify with actual auth method)
-          # Replace with your command to authenticate or use test org credentials
-          sf --version
-          echo 'Salesforce CLI is successfully running!'
-          # Replace with actual test or deployment commands below
-          echo 'Running your tests...'
-          # Example test commands
-          sf org list
-          ls -la
-        "
+            -   name: Check for dockerenv file
+                run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+
+
+            -   name: Test
+                run: sf --version
+
+            - uses: actions/checkout@v4
+
+            -   name: Debug Environment Variables
+                run: |
+                    pwd 
+                    whoami
+                    echo "SF_TARGET_USERNAME: $SF_TARGET_USERNAME"
+                    echo "SF_TARGET_CLIENT_ID: $SF_TARGET_CLIENT_ID"
+                    echo "SF_TARGET_INSTANCE_URL: $SF_TARGET_INSTANCE_URL"
+                    echo "SF_TARGET_JWT_KEY: $SF_TARGET_JWT_KEY"
+
+            -   name: Debug Current Working Directory and Env Vars
+                run: |
+                    echo "Working Directory: $(pwd)"
+                    echo "HOME: $HOME"
+                    echo "User: $(whoami)"
+                    ls -la 
+                    echo "LS in HOME"
+                    ls -la /home/sfautomation  # Check files in sfautomation's home directory
+
+            -   name: Login to org
+                run: |
+                    echo "$SF_TARGET_JWT_KEY"  > jwt.key
+                    sf org login jwt --username "$SF_TARGET_USERNAME" --jwt-key-file jwt.key --client-id "$SF_TARGET_CLIENT_ID" --alias GaborOrg --set-default --instance-url "$SF_TARGET_INSTANCE_URL"
