@@ -40,10 +40,10 @@ jobs:
                 run: |
                     pwd 
                     whoami
-                    echo "$SF_TARGET_USERNAME"
-                    echo "$SF_TARGET_CLIENT_ID"
-                    echo "$SF_TARGET_INSTANCE_URL"
-                    echo "$SF_TARGET_JWT_KEY"
+                    echo "SF_TARGET_USERNAME: $SF_TARGET_USERNAME"
+                    echo "SF_TARGET_CLIENT_ID: $SF_TARGET_CLIENT_ID"
+                    echo "SF_TARGET_INSTANCE_URL: $SF_TARGET_INSTANCE_URL"
+                    echo "SF_TARGET_JWT_KEY: $SF_TARGET_JWT_KEY"
 
             -   name: Debug Current Working Directory and Env Vars
                 run: |
@@ -51,3 +51,6 @@ jobs:
                     echo "HOME: $HOME"
                     echo "User: $(whoami)"
                     ls -la /home/sfautomation  # Check files in sfautomation's home directory
+
+            -   name: Login to org
+                run: sf org login jwt --username "$SF_TARGET_USERNAME" --jwt-key-file "$SF_TARGET_JWT_KEY" --client-id "$SF_TARGET_CLIENT_ID" --alias GaborOrg --set-default --instance-url "$SF_TARGET_INSTANCE_URL"
