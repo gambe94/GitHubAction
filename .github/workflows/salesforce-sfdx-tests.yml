@@ -16,11 +16,10 @@ jobs:
                 username: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
             env:
-                SF_TARGET_USERNAME: ${{ secrets.SF_TARGET_USERNAME }}
+                SF_TARGET_USERNAME: ${{ env.SF_TARGET_USERNAME }}
                 SF_TARGET_CLIENT_ID: ${{ secrets.SF_TARGET_CLIENT_ID }}
-                SF_TARGET_INSTANCE_URL: ${{ secrets.SF_TARGET_INSTANCE_URL }}
+                SF_TARGET_INSTANCE_URL: ${{ env.SF_TARGET_INSTANCE_URL }}
                 SF_TARGET_JWT_KEY: ${{ secrets.SF_TARGET_JWT_KEY }}
-                HOME: /home/sfautomation
             ports:
                 - 80
 
@@ -53,4 +52,6 @@ jobs:
                     ls -la /home/sfautomation  # Check files in sfautomation's home directory
 
             -   name: Login to org
-                run: sf org login jwt --username "$SF_TARGET_USERNAME" --jwt-key-file "$SF_TARGET_JWT_KEY" --client-id "$SF_TARGET_CLIENT_ID" --alias GaborOrg --set-default --instance-url "$SF_TARGET_INSTANCE_URL"
+                run: |
+                    echo "$SF_TARGET_JWT_KEY"  > jwt.key
+                    sf org login jwt --username "$SF_TARGET_USERNAME" --jwt-key-file jwt.key --client-id "$SF_TARGET_CLIENT_ID" --alias GaborOrg --set-default --instance-url "$SF_TARGET_INSTANCE_URL"
