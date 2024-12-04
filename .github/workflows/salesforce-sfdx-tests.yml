@@ -24,7 +24,6 @@ jobs:
                 - 80
 
             options:
-                --entrypoint /usr/bin/bash
                 --workdir /home/sfautomation
 
         steps:
