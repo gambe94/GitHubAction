@@ -24,7 +24,7 @@ jobs:
                 - 80
 
             options:
-                --workdir /home/sfautomation
+                --user root
 
         steps:
             -   name: Check for dockerenv file
