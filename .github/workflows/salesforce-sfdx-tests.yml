@@ -20,12 +20,13 @@ jobs:
                 SF_TARGET_CLIENT_ID: ${{ secrets.SF_TARGET_CLIENT_ID }}
                 SF_TARGET_INSTANCE_URL: ${{ vars.SF_TARGET_INSTANCE_URL }}
                 SF_TARGET_JWT_KEY: ${{ secrets.SF_TARGET_JWT_KEY }}
+                GITHUB_HOME: /home/sfautomation
 
             ports:
                 - 80
 
             options:
-                --user root
+
                 --workdir /home/sfautomation
 
         steps:
