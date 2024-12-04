@@ -16,43 +16,46 @@ jobs:
                 username: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
             env:
-                SF_TARGET_USERNAME: ${{ vars.SF_TARGET_USERNAME }}
+                SF_TARGET_USERNAME: ${{ secrets.SF_TARGET_USERNAME }}
                 SF_TARGET_CLIENT_ID: ${{ secrets.SF_TARGET_CLIENT_ID }}
-                SF_TARGET_INSTANCE_URL: ${{ vars.SF_TARGET_INSTANCE_URL }}
+                SF_TARGET_INSTANCE_URL: ${{ secrets.SF_TARGET_INSTANCE_URL }}
                 SF_TARGET_JWT_KEY: ${{ secrets.SF_TARGET_JWT_KEY }}
+                HOME: /home/sfautomation  # Make sure HOME points to sfautomation's home directory
             ports:
                 - 80
-
             options:
-                --user root
+                --user sfautomation  # Use the correct user
+                --workdir /home/sfautomation  # Ensure that this points to the correct working directory in the container
 
         steps:
-            -   name: Check for dockerenv file
-                run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+            - name: Check for dockerenv file
+              run: |
+                  if [ -f /.dockerenv ]; then echo "Found dockerenv"; else echo "No dockerenv"; fi
 
+            - name: Test Salesforce CLI version
+              run: sf --version
 
-            -   name: Test
-                run: sf --version
+            - name: Checkout repository code into the container
+              uses: actions/checkout@v4
+                # This step will ensure the repository code is available in the container
 
-            - uses: actions/checkout@v3
+            - name: Debug Environment Variables
+              run: |
+                  pwd 
+                  whoami
+                  echo "SF_TARGET_USERNAME: $SF_TARGET_USERNAME"
+                  echo "SF_TARGET_CLIENT_ID: $SF_TARGET_CLIENT_ID"
+                  echo "SF_TARGET_INSTANCE_URL: $SF_TARGET_INSTANCE_URL"
+                  echo "SF_TARGET_JWT_KEY: $SF_TARGET_JWT_KEY"
 
-            -   name: Debug Environment Variables
-                run: |
-                    pwd 
-                    whoami
-                    echo "SF_TARGET_USERNAME: $SF_TARGET_USERNAME"
-                    echo "SF_TARGET_CLIENT_ID: $SF_TARGET_CLIENT_ID"
-                    echo "SF_TARGET_INSTANCE_URL: $SF_TARGET_INSTANCE_URL"
-                    echo "SF_TARGET_JWT_KEY: $SF_TARGET_JWT_KEY"
+            - name: Debug Current Working Directory and Env Vars
+              run: |
+                  echo "Working Directory: $(pwd)"
+                  echo "HOME: $HOME"
+                  echo "User: $(whoami)"
+                  ls -la /home/sfautomation  # Check files in sfautomation's home directory
 
-            -   name: Debug Current Working Directory and Env Vars
-                run: |
-                    echo "Working Directory: $(pwd)"
-                    echo "HOME: $HOME"
-                    echo "User: $(whoami)"
-                    ls -la /home/sfautomation  # Check files in sfautomation's home directory
-
-            -   name: Login to org
-                run: |
-                    echo "$SF_TARGET_JWT_KEY"  > jwt.key
-                    sf org login jwt --username "$SF_TARGET_USERNAME" --jwt-key-file jwt.key --client-id "$SF_TARGET_CLIENT_ID" --alias GaborOrg --set-default --instance-url "$SF_TARGET_INSTANCE_URL"
+            - name: Login to Salesforce Org
+              run: |
+                  echo "$SF_TARGET_JWT_KEY" > jwt.key
+                  sf org login jwt --username "$SF_TARGET_USERNAME" --jwt-key-file jwt.key --client-id "$SF_TARGET_CLIENT_ID" --alias GaborOrg --set-default --instance-url "$SF_TARGET_INSTANCE_URL"
