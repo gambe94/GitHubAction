@@ -43,7 +43,7 @@ jobs:
           sf org list
           ls -la
           # Create JWT key file from environment variable
-          echo \"$SF_TARGET_JWT_KEY\" > /workspace/jwt.key
+          echo \"$SF_TARGET_JWT_KEY\" > jwt.key
           # Authenticate with JWT
           sf org login jwt \
           --username $SF_TARGET_USERNAME \
