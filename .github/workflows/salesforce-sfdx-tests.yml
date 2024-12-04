@@ -11,7 +11,7 @@ jobs:
     sfdx-tests:
         runs-on: ubuntu-latest
         container:
-            image: ghcr.io/gambe94/sf_automation:1.0.3
+            image: gambe94/sf_automation:1.0.3
             credentials:
                 username: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
