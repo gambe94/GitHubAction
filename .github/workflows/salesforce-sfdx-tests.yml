@@ -25,13 +25,13 @@ jobs:
 
     # Pull the Docker image for Salesforce CLI
     - name: Pull Salesforce SFDX Docker Image
-      run: docker pull gambe94/sf_automation:1.0.2
+      run: docker pull gambe94/sf_automation:1.0.3
 
       # Run tests inside the container
     - name: Run Salesforce CLI commands inside Docker
       run: |
         # Start the container and run a command inside it
-        docker run --rm -v ${PWD}:/workspace -w /workspace gambe94/sf_automation:1.0.2 /usr/bin/bash -c "
+        docker run --rm -v ${PWD}:/workspace -w /workspace gambe94/sf_automation:1.0.3 /usr/bin/bash -c "
           echo 'Running Salesforce CLI Tests...'
           # Salesforce CLI login (example, modify with actual auth method)
           # Replace with your command to authenticate or use test org credentials
@@ -42,4 +42,13 @@ jobs:
           # Example test commands
           sf org list
           ls -la
-        "
+          # Create JWT key file from environment variable
+          echo \"$SF_TARGET_JWT_KEY\" > /workspace/jwt.key
+          # Authenticate with JWT
+          sf org login jwt \
+          --username $SF_TARGET_USERNAME \
+          --jwt-key-file /workspace/jwt.key \
+          --client-id $SF_TARGET_CLIENT_ID \
+          --alias $SF_TARGET_ALIAS \
+          --set-default \
+          --instance-url $SF_TARGET_INSTANCE_URL "
