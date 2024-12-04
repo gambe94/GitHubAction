@@ -20,6 +20,7 @@ jobs:
                 SF_TARGET_CLIENT_ID: ${{ secrets.SF_TARGET_CLIENT_ID }}
                 SF_TARGET_INSTANCE_URL: ${{ secrets.SF_TARGET_INSTANCE_URL }}
                 SF_TARGET_JWT_KEY: ${{ secrets.SF_TARGET_JWT_KEY }}
+                HOME: /home/sfautomation
             ports:
                 - 80
 
@@ -44,5 +45,9 @@ jobs:
                     echo "$SF_TARGET_INSTANCE_URL"
                     echo "$SF_TARGET_JWT_KEY"
 
-            -   name: List files in the repository
-                run: las -la
+            -   name: Debug Current Working Directory and Env Vars
+                run: |
+                    echo "Working Directory: $(pwd)"
+                    echo "HOME: $HOME"
+                    echo "User: $(whoami)"
+                    ls -la /home/sfautomation  # Check files in sfautomation's home directory
