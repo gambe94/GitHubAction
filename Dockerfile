@@ -35,18 +35,4 @@ RUN npm install --global @salesforce/cli
 # Verify Salesforce CLI installation
 RUN sf --version
 
-# Create a new user with a home directory and default shell as bash
-RUN useradd -m -s /bin/bash sfautomation \
-  && mkdir -p /home/sfautomation/.npm \
-  && mkdir -p /home/sfautomation/.local/share \
-  && chown -R sfautomation:sfautomation /home/sfautomation \
-  && chown -R sfautomation:sfautomation /usr/lib/node_modules \
-  && chown -R sfautomation:sfautomation /usr/bin/sf
-
-# Switch to the new user and set the working directory
-USER sfautomation
 WORKDIR /home/sfautomation
-
-# Add the non-root user to the sudoers file
-# allowing the user to execute sudo commands without a password:
-RUN echo "sfautomation ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers

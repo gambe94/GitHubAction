@@ -36,6 +36,7 @@ jobs:
             -   name: Debug Environment Variables
                 run: |
                     pwd 
+                    whoami
                     echo "$SF_TARGET_USERNAME"
                     echo "$SF_TARGET_CLIENT_ID"
                     echo "$SF_TARGET_INSTANCE_URL"
