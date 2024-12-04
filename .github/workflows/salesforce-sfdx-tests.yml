@@ -35,6 +35,8 @@ jobs:
             -   name: Test
                 run: sf --version
 
+            - uses: actions/checkout@v4
+
             -   name: Debug Environment Variables
                 run: |
                     pwd 
