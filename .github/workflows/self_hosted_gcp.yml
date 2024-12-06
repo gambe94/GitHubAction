@@ -1,0 +1,24 @@
+name: Actions Runner Controller Demo
+
+on:
+  pull_request:
+      branches: [ "develop" ]
+  workflow_dispatch:
+
+jobs:
+  GCP-Test:
+    runs-on: [arc-runner-set]
+    steps:
+      - name: Check
+        run: whoami
+        
+      - name: Echo Public IP Address
+        run: |
+          echo "Fetching Public IP..."
+          curl -s http://ifconfig.me
+    
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Salesforce CLI
+        run: sf --version
