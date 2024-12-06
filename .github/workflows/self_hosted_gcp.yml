@@ -1,0 +1,22 @@
+name: GCP Hosted
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+    steps:
+      - name: Check
+        run: whoami
+        
+      - name: Echo Public IP Address
+        run: |
+          echo "Fetching Public IP..."
+          curl -s http://ifconfig.me
+    
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Salesforce CLI
+        run: sf --version
